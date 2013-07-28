@@ -51,16 +51,13 @@ To make it tweet a random collection item enter:
 
 You probably want to set these up to run at regular intervals using something like cron. I tend to run the 'reply' script every five minutes, and the 'random' script every few hours.
 
-
-Using the [Trove API](http://trove.nla.gov.au/general/api) and the Twitter API.
-
 ### Basic bot behaviours
 
 * Include the word 'hello' in a message to your bot to receive a greeting and a random collection item.
 * Any other message will be treated as a query and will be sent off to the Trove API to look for matching results.
 * To receive any old random collection item, just tweet your bot the hashtag '#luckydip' and nothing else.
 
-### Modifying your bot query:
+### Modifying your bot query
 
 By default, your bot tweets the first (ie most relevant) matching result back to you. To change this you can:
 
