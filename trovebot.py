@@ -21,6 +21,7 @@ except ImportError:
 
 API_QUERY = 'http://api.trove.nla.gov.au/result?q={keywords}&zone=picture&key={key}&encoding=json&n={number}&s={start}&reclevel=full&sortby={sort}'
 GREETING = 'Greetings human! Insert keywords. Use #luckydip for randomness.'
+FAILED = "I didn't find anything for '{query}' so I found you this instead."
 BOT_NAME = 'YourBotName'
 NUC = 'YourNUC'
 
@@ -89,6 +90,7 @@ def process_tweet(tweet):
     query = None
     random = False
     hello = False
+    failed = False
     sort = 'relevance'
     trove_url = None
     text = tweet.text.strip()
@@ -116,11 +118,13 @@ def process_tweet(tweet):
         if not record:
             if query:
                 # Search failed
-                message = "@{user} ERROR! No article matching '{text}'.".format(user=user, text=text)
+                random = True
+                failed = True
+                query = None
             else:
                 # Something's wrong, let's just give up.
                 message = "@{user} ERROR! Something went wrong. [:-(] {date}".format(user=user, date=datetime.datetime.now())
-            break
+                break
         else:
             # Filter out 'coming soon' articles
             try:
@@ -141,6 +145,11 @@ def process_tweet(tweet):
             chars = 118 - (len(user) + len(GREETING) + 5)
             title = title[:chars]
             message = "@{user} {greeting} '{title}' {url}".format(user=user, greeting=GREETING, title=title.encode('utf-8'), url=trove_url)
+        elif failed:
+            failed_msg = FAILED.format(query = text)
+            chars = 118 - (len(user) + len(failed_msg) + 6)
+            title = title[:chars]
+            message = "@{user} {failed} '{title}' {url}".format(user=user, failed=failed_msg, title=title.encode('utf-8'), url=trove_url)
         else:
             chars = 118 - (len(user) + 4)
             title = title[:chars]
