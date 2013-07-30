@@ -99,6 +99,10 @@ def process_tweet(tweet):
         query = ''
         random = True
         hello = True
+    elif text == '':
+        query = ''
+        random = True
+        hello = True
     else:
         if '#luckydip' in text:
             # Get a random article
