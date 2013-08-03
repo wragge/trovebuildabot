@@ -93,9 +93,13 @@ def process_tweet(tweet):
     trove_url = None
     text = tweet.text.strip()
     user = tweet.user.screen_name
-    text = re.sub(r'@{} '.format(BOT_NAME), '', text, flags=re.IGNORECASE)
+    text = re.sub(r'@{} *'.format(BOT_NAME), '', text, flags=re.IGNORECASE)
     text = text.replace(u'\u201c', '"').replace(u'\u201d', '"').replace(u'\u2019', "'")
     if re.search(r'\bhello\b', text, re.IGNORECASE):
+        query = ''
+        random = True
+        hello = True
+    elif text == '':
         query = ''
         random = True
         hello = True
