@@ -33,6 +33,20 @@ To limit the bot's tweets to your own collection you need to know your organisat
 4. Look for the NUC symbol and copy it. It may be just a four letter code, or a four letter code followed by a colon and further letters eg: 'AMOA' or 'AMOA:C'.
 5. Copy the NUC symbol to the appropriate place in trovebot.py.
 
+### Other configuration options
+
+By default the bot will treat every tweet sent to it as a query to be used to search the collection. If you want to use your bot account to have human-mediated conversations, you might want to change this. Set
+
+    AUTO_REPLY = False
+
+and tweets will only be treated as queries if they include the hashtag '#q'. You might also want to change the default GREETING string to explain this to users.
+
+You also have the option to change where the link in a collection result will go. By default the links go to Trove. If you set
+
+    DEEP_LINK = True
+
+the bot will use the deep link into the original collection database, assuming that one is available.
+
 ### Deploying your bot
 
 You don't need anything fancy to host your bot, just a machine permanently connected to the net. If you're deploying to a server, you might need to set the path values in file_locations_prod.py. If that's the case, don't upload file_locations_dev.py.
