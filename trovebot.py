@@ -24,6 +24,11 @@ GREETING = 'Greetings human! Insert keywords. Use #luckydip for randomness.'
 FAILED = "I didn't find anything for '{query}' so I found you this instead."
 BOT_NAME = 'YourBotName'
 NUC = 'YourNUC'
+# Set AUTO_REPLY to false to stop the bot treating every message as a search query.
+# If False users have to add a #q hashtage to a query.
+AUTO_REPLY = True
+# Set DEEP_LINK to True to use direct link to collection db if it's available.
+DEEP_LINK = False
 
 
 logging.basicConfig(filename=LOG_FILE, level=logging.DEBUG,)
@@ -93,6 +98,7 @@ def process_tweet(tweet):
     failed = False
     sort = 'relevance'
     trove_url = None
+    url = None
     text = tweet.text.strip()
     user = tweet.user.screen_name
     text = re.sub(r'@{} *'.format(BOT_NAME), '', text, flags=re.IGNORECASE)
@@ -106,6 +112,8 @@ def process_tweet(tweet):
         random = True
         hello = True
     else:
+        if re.search(r'#q\b', tweet.text):
+            text = text.replace('#q', '').strip()
         if '#luckydip' in text:
             # Get a random article
             text = text.replace('#luckydip', '').strip()
@@ -145,20 +153,33 @@ def process_tweet(tweet):
                 break
     if record:
         title = record['title']
+        if DEEP_LINK:
+            url = get_url(record)
+        if not url:
+            url = trove_url
         if hello:
             chars = 118 - (len(user) + len(GREETING) + 5)
             title = title[:chars]
-            message = "@{user} {greeting} '{title}' {url}".format(user=user, greeting=GREETING, title=title.encode('utf-8'), url=trove_url)
+            message = "@{user} {greeting} '{title}' {url}".format(user=user, greeting=GREETING, title=title.encode('utf-8'), url=url)
         elif failed:
-            failed_msg = FAILED.format(query = text)
+            failed_msg = FAILED.format(query=text)
             chars = 118 - (len(user) + len(failed_msg) + 6)
             title = title[:chars]
-            message = "@{user} {failed} '{title}' {url}".format(user=user, failed=failed_msg, title=title.encode('utf-8'), url=trove_url)
+            message = "@{user} {failed} '{title}' {url}".format(user=user, failed=failed_msg, title=title.encode('utf-8'), url=url)
         else:
             chars = 118 - (len(user) + 4)
             title = title[:chars]
-            message = "@{user} '{title}' {url}".format(user=user, greeting=GREETING, title=title.encode('utf-8'), url=trove_url)
+            message = "@{user} '{title}' {url}".format(user=user, greeting=GREETING, title=title.encode('utf-8'), url=url)
     return message
+
+
+def get_url(record):
+    url = None
+    for link in record['identifier']:
+        if link['linktype'] == 'fulltext':
+            url = link['value']
+            break
+    return url
 
 
 def get_record(text, random=False, start=0, sort='relevance'):
@@ -197,18 +218,19 @@ def tweet_reply(api):
         for tweet in results:
             if tweet.in_reply_to_screen_name == BOT_NAME:
                 #print tweet.text
-                try:
-                    message = process_tweet(tweet)
-                except:
-                    logging.exception('{}: Got exception on process_tweet'.format(datetime.datetime.now()))
-                    message = None
-                if message:
+                if AUTO_REPLY or re.search(r'#q\b', tweet.text):
                     try:
-                        print message
-                        api.PostUpdate(message, in_reply_to_status_id=tweet.id)
+                        message = process_tweet(tweet)
                     except:
-                        logging.exception('{}: Got exception on sending tweet'.format(datetime.datetime.now()))
-                time.sleep(20)
+                        logging.exception('{}: Got exception on process_tweet'.format(datetime.datetime.now()))
+                        message = None
+                    if message:
+                        try:
+                            print message
+                            api.PostUpdate(message, in_reply_to_status_id=tweet.id)
+                        except:
+                            logging.exception('{}: Got exception on sending tweet'.format(datetime.datetime.now()))
+                    time.sleep(20)
         if results:
             with open(LAST_ID, 'w') as last_id_file:
                 last_id_file.write(str(max([x.id for x in results])))
