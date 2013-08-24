@@ -26,6 +26,7 @@ BOT_NAME = 'YourBotName'
 NUC = 'YourNUC'
 # Set AUTO_REPLY to false to stop the bot treating every message as a search query.
 # If False users have to add a #q hashtage to a query.
+# If you set to False you might want to change the GREETING as well.
 AUTO_REPLY = True
 # Set DEEP_LINK to True to use direct link to collection db if it's available.
 DEEP_LINK = False
