@@ -122,7 +122,7 @@ def process_tweet(tweet):
         if '#any' in text:
             text = text.replace('#any', '').strip()
             #print "'{}'".format(query)
-            query = '({})'.format(' OR '.join(query.split()))
+            query = '({})'.format(' OR '.join(text.split()))
         else:
             query = text
     start = 0
