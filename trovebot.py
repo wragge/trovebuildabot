@@ -104,6 +104,8 @@ def process_tweet(tweet):
     user = tweet.user.screen_name
     text = re.sub(r'@{} *'.format(BOT_NAME), '', text, flags=re.IGNORECASE)
     text = text.replace(u'\u201c', '"').replace(u'\u201d', '"').replace(u'\u2019', "'")
+    if re.search(r'#q\b', tweet.text, re.IGNORECASE):
+        text = re.sub(r'#q', '', text, re.IGNORECASE).strip()
     if re.search(r'\bhello\b', text, re.IGNORECASE):
         query = ''
         random = True
@@ -113,8 +115,6 @@ def process_tweet(tweet):
         random = True
         hello = True
     else:
-        if re.search(r'#q\b', tweet.text):
-            text = text.replace('#q', '').strip()
         if '#luckydip' in text:
             # Get a random article
             text = text.replace('#luckydip', '').strip()
@@ -159,7 +159,7 @@ def process_tweet(tweet):
         if not url:
             url = trove_url
         if hello:
-            chars = 118 - (len(user) + len(GREETING) + 5)
+            chars = 118 - (len(user) + len(GREETING) + 6)
             title = title[:chars]
             message = "@{user} {greeting} '{title}' {url}".format(user=user, greeting=GREETING, title=title.encode('utf-8'), url=url)
         elif failed:
@@ -219,7 +219,7 @@ def tweet_reply(api):
         for tweet in results:
             if tweet.in_reply_to_screen_name == BOT_NAME:
                 #print tweet.text
-                if AUTO_REPLY or re.search(r'#q\b', tweet.text):
+                if AUTO_REPLY or re.search(r'#q\b', tweet.text, re.IGNORECASE) or re.search(r'\bhello\b', tweet.text, re.IGNORECASE):
                     try:
                         message = process_tweet(tweet)
                     except:
@@ -248,6 +248,7 @@ def check_thumbnail(record):
 
 def tweet_random(api):
     trove_url = None
+    url = None
     while not trove_url:
         record = get_record(text='', random=True)
         try:
@@ -258,6 +259,10 @@ def tweet_random(api):
     #alert = record['type'][0]
     #chars = 118 - (len(alert) + 5)
     #thumbnail = check_thumbnail(record)
+    if DEEP_LINK:
+        url = get_url(record)
+    if not url:
+        url = trove_url
     chars = 117
     title = record['title'][:chars]
     message = "'{title}' {url}".format(title=title.encode('utf-8'), url=trove_url)
