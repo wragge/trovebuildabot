@@ -265,7 +265,7 @@ def tweet_random(api):
         url = trove_url
     chars = 117
     title = record['title'][:chars]
-    message = "'{title}' {url}".format(title=title.encode('utf-8'), url=trove_url)
+    message = "'{title}' {url}".format(title=title.encode('utf-8'), url=url)
     print message
     api.PostUpdate(message)
 
