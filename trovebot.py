@@ -105,7 +105,7 @@ def process_tweet(tweet):
     text = re.sub(r'@{} *'.format(BOT_NAME), '', text, flags=re.IGNORECASE)
     text = text.replace(u'\u201c', '"').replace(u'\u201d', '"').replace(u'\u2019', "'")
     if re.search(r'#q\b', tweet.text, re.IGNORECASE):
-        text = re.sub(r'#q', '', text, re.IGNORECASE).strip()
+        text = re.sub(r'#q', '', text, flags=re.IGNORECASE).strip()
     if re.search(r'\bhello\b', text, re.IGNORECASE):
         query = ''
         random = True
